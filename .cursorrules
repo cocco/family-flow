@@ -1,0 +1,69 @@
+## Cursor Rules – Application Development (production quality)
+
+These rules guide code generation and edits for the application. Treat `docs/**` as the source of truth for technologies, folder structures, endpoints, and scope. Do not duplicate that content here.
+
+### 1) Scope and Alignment
+- Implement only features defined in `docs/`; no scope creep.
+- When ambiguous, choose the simplest solution consistent with `docs/` and existing patterns.
+- If divergence from `docs/` is necessary, make the minimal change and propose a targeted docs update referencing affected sections.
+
+### 2) Configuration & Secrets
+- Read configuration from environment variables only; never hardcode secrets.
+- Validate required env vars at startup; fail fast with clear errors.
+- Keep defaults safe; do not enable debug behavior in production builds.
+
+### 3) Security & Privacy
+- Enforce authentication and authorization consistently (RBAC) on all sensitive operations.
+- Validate and sanitize all inputs at the edge. Reject unknown fields.
+- Use parameterized queries; never concatenate SQL.
+- Do not log secrets, tokens, or PII. Redact sensitive fields in logs and errors.
+- Protect against common issues (XSS, CSRF, SQLi) appropriate to the chosen transport as defined in `docs/`.
+
+### 4) API Contracts & Errors
+- Honor the contracts defined in `docs/` exactly.
+- Success responses wrap payloads: `{ data: <payload> }`. For lists optionally include pagination.
+- Error responses: `{ error: { code, message, details? } }` with correct HTTP status codes.
+- Prefer idempotent semantics where appropriate (e.g., PUT for updates).
+
+### 5) TypeScript & Code Quality
+- TS strict; no `any` in public APIs.
+- Explicitly type exported functions, modules, and components.
+- Prefer composition over inheritance; avoid deep abstractions.
+- Use guard clauses and early returns; keep functions small and testable.
+- Name things descriptively; avoid abbreviations and overly generic names.
+- No dead code, commented-out code, or unused exports.
+- Do not introduce new dependencies without clear need and consistency with `docs/`.
+
+### 6) Error Handling & Logging
+- Do not use empty catch blocks; handle errors meaningfully or rethrow.
+- Centralize error handling; normalize errors to the API error shape.
+- Use structured, minimal logs. Include correlation or request identifiers when available.
+- Do not spam logs; choose INFO/WARN/ERROR appropriately.
+
+### 7) Testing & Quality Gates
+- Add/maintain tests for new behavior: unit for logic; integration for IO boundaries.
+- Tests should be deterministic, isolated, and fast.
+- CI must run build, lint, typecheck, and tests on PRs and main.
+
+### 8) Performance & Reliability
+- Avoid N+1 queries and unnecessary network calls.
+- Prefer pagination and server-side filtering for list endpoints.
+- Cache and debounce where it materially improves UX or load, consistent with `docs/`.
+- Use portable implementations that work across development and production environments.
+
+### 9) Accessibility & UX
+- Build accessible UI: labels, roles, keyboard navigation, focus states, and sufficient contrast.
+- Mobile-first, responsive layouts as per `docs/`.
+- Provide clear, actionable error messages; avoid exposing internals to end users.
+
+### 10) Readability & Maintainability
+- Comment the “why”, not the “how”, for non-obvious decisions.
+- Keep diffs focused; avoid unrelated refactors within functional changes.
+- Match the existing formatting and conventions of the codebase.
+
+### 11) Definition of Done (each PR)
+- Aligned with `docs/` scope and contracts; no undocumented features.
+- Types strict, no `any` in public APIs; lints and type checks pass.
+- Tests added/updated and passing; code is accessible and responsive where relevant.
+- Proper error handling and logging; no secrets in code or logs.
+- `README.md` and `.env.example` updated if behavior or configuration changed.
