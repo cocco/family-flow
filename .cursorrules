@@ -67,3 +67,9 @@ These rules guide code generation and edits for the application. Treat `docs/**`
 - Tests added/updated and passing; code is accessible and responsive where relevant.
 - Proper error handling and logging; no secrets in code or logs.
 - `README.md` and `.env.example` updated if behavior or configuration changed.
+- You have killed all the processes you spawned up during the development
+
+### 12 Documnent changes
+- Verify that the documentation is up-to-date after each change in the code base
+- Always update todo.md
+

@@ -3,12 +3,12 @@
 Goal: ship visible core flows fast using mocked data. Defer auth and DB until later phases. Aligns with docs in `docs/` (PRD, architecture, backend, frontend).
 
 ## Phase 1 — Child Functionality (mocked, with seed data; no auth, no DB)
-- [ ] Bootstrap frontend (React + TypeScript + Vite)
-  - [ ] Add Tailwind CSS
-  - [ ] Add React Router (routes for child dashboard)
-  - [ ] Add Context for app/session (temporary role switcher)
-  - [ ] Configure ESLint/Prettier (TS strict)
-  - [ ] Env validation at startup (safe defaults)
+- [x] Bootstrap frontend (React + TypeScript + Vite)
+  - [x] Add Tailwind CSS
+  - [x] Add React Router (routes for child dashboard)
+  - [x] Add Context for app/session (temporary role switcher)
+  - [x] Configure ESLint/Prettier (TS strict)
+  - [x] Env validation at startup (safe defaults)
 - [ ] Mock API client and fixtures (child-focused)
   - [ ] Define API response shape `{ data }` / `{ error: { code, message, details? } }`
   - [ ] Create in-memory stores for users, chores, bonus tasks
