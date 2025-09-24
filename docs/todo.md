@@ -9,11 +9,11 @@ Goal: ship visible core flows fast using mocked data. Defer auth and DB until la
   - [x] Add Context for app/session (temporary role switcher)
   - [x] Configure ESLint/Prettier (TS strict)
   - [x] Env validation at startup (safe defaults)
-- [ ] Mock API client and fixtures (child-focused)
-  - [ ] Define API response shape `{ data }` / `{ error: { code, message, details? } }`
-  - [ ] Create in-memory stores for users, chores, bonus tasks
-  - [ ] Simulate network latency and error cases
-  - [ ] Enforce role gating for child actions
+- [x] Mock API client and fixtures (child-focused)
+  - [x] Define API response shape `{ data }` / `{ error: { code, message, details? } }`
+  - [x] Create in-memory stores for users, chores, bonus tasks
+  - [x] Simulate network latency and error cases
+  - [x] Enforce role gating for child actions
 - [ ] Child Dashboard (UI only, mock-backed)
   - [ ] Monthly chores checklist (mark complete)
   - [ ] Available bonus tasks list (reserve)
