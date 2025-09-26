@@ -1,8 +1,159 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
+import { mockClient } from '../api/mockClient';
+import type { ChoreDto, BonusTaskDto, TaskReservationDto, ChildAllowanceSummaryDto } from '../api/types';
 
 const ChildDashboard: React.FC = () => {
   const { currentUser, logout } = useApp();
+  const [chores, setChores] = useState<ChoreDto[]>([]);
+  const [availableTasks, setAvailableTasks] = useState<BonusTaskDto[]>([]);
+  const [reservations, setReservations] = useState<TaskReservationDto[]>([]);
+  const [allowanceSummary, setAllowanceSummary] = useState<ChildAllowanceSummaryDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [taskById, setTaskById] = useState<Record<string, BonusTaskDto>>({});
+
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const ctx = { currentUser };
+        
+        // Load all data in parallel
+        const [choresResult, tasksResult, reservationsResult, allowanceResult] = await Promise.all([
+          mockClient.listChoresByChild(ctx, currentUser.id, currentMonth, currentYear),
+          mockClient.listAvailableBonusTasks(ctx),
+          mockClient.listReservationsByChild(ctx, currentUser.id),
+          mockClient.getAllowanceSummary(ctx, currentUser.id, currentMonth, currentYear),
+        ]);
+
+        if ('error' in choresResult) throw new Error(choresResult.error.message);
+        if ('error' in tasksResult) throw new Error(tasksResult.error.message);
+        if ('error' in reservationsResult) throw new Error(reservationsResult.error.message);
+        if ('error' in allowanceResult) throw new Error(allowanceResult.error.message);
+
+        setChores(choresResult.data);
+        setAvailableTasks(tasksResult.data);
+        // Build a lookup for tasks by id so reserved tasks keep their titles after removal from availability
+        setTaskById(Object.fromEntries(tasksResult.data.map((t) => [t.id, t])));
+        setReservations(reservationsResult.data);
+        setAllowanceSummary(allowanceResult.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [currentUser, currentMonth, currentYear]);
+
+  const handleCompleteChore = async (choreId: string) => {
+    if (!currentUser) return;
+    
+    try {
+      const result = await mockClient.completeChore({ currentUser }, choreId);
+      if ('error' in result) {
+        setError(result.error.message);
+        return;
+      }
+      
+      // Update local state
+      setChores(prev => prev.map(chore => 
+        chore.id === choreId ? result.data : chore
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to complete chore');
+    }
+  };
+
+  const handleReserveTask = async (taskId: string) => {
+    if (!currentUser) return;
+    
+    try {
+      const result = await mockClient.reserveBonusTask({ currentUser }, taskId);
+      if ('error' in result) {
+        setError(result.error.message);
+        return;
+      }
+      
+      // Update local state
+      // Capture the task details before removing from available list
+      const reservedTask = availableTasks.find(t => t.id === taskId);
+      if (reservedTask) {
+        setTaskById(prev => ({ ...prev, [taskId]: reservedTask }));
+      }
+      setReservations(prev => [...prev, result.data]);
+      setAvailableTasks(prev => prev.filter(task => task.id !== taskId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reserve task');
+    }
+  };
+
+  const handleCompleteReservation = async (reservationId: string) => {
+    if (!currentUser) return;
+    
+    try {
+      const result = await mockClient.completeReservation({ currentUser }, reservationId);
+      if ('error' in result) {
+        setError(result.error.message);
+        return;
+      }
+      
+      // Update local state
+      setReservations(prev => prev.map(res => 
+        res.id === reservationId ? result.data : res
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to complete task');
+    }
+  };
+
+  // Combine chores and reserved tasks for unified display
+  const allTasks = [
+    ...chores.map(chore => ({
+      id: chore.id,
+      title: chore.title,
+      description: chore.description,
+      type: 'chore' as const,
+      isCompleted: chore.isCompleted,
+      completedAt: chore.completedAt,
+      approvedAt: chore.approvedAt,
+      rewardAmount: 0, // Monthly chores don't have individual rewards
+    })),
+    ...reservations.map(reservation => {
+      const task = taskById[reservation.taskId];
+      return {
+        id: reservation.id,
+        title: task?.title || 'Unknown Task',
+        description: task?.description,
+        type: 'bonus' as const,
+        isCompleted: reservation.isCompleted,
+        completedAt: reservation.completedAt,
+        approvedAt: reservation.approvedAt,
+        rewardAmount: task?.rewardAmount || 0,
+      };
+    }),
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -13,11 +164,11 @@ const ChildDashboard: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900">
                 Welcome, {currentUser?.displayName}!
               </h1>
-              <p className="text-gray-600">Child Dashboard</p>
+              <p className="text-gray-600">Your tasks and earnings</p>
             </div>
             <button
               onClick={logout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
               Logout
             </button>
@@ -27,73 +178,150 @@ const ChildDashboard: React.FC = () => {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Monthly Chores */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">📋</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Monthly Chores
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        Coming Soon
-                      </dd>
-                    </dl>
-                  </div>
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <span className="text-red-400">⚠️</span>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error</h3>
+                  <p className="mt-1 text-sm text-red-700">{error}</p>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Bonus Tasks */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">⭐</span>
-                    </div>
+          {/* Earnings Summary */}
+          {allowanceSummary && (
+            <div className="mb-8 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">💰 Monthly Earnings</h2>
+                  <p className="text-yellow-100">
+                    Base allowance: ${allowanceSummary.baseAllowance.toFixed(2)}
+                    {allowanceSummary.approvedBonusTotal > 0 && (
+                      <span> + ${allowanceSummary.approvedBonusTotal.toFixed(2)} bonus</span>
+                    )}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-4xl font-bold text-white">
+                    ${allowanceSummary.total.toFixed(2)}
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Bonus Tasks
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        Coming Soon
-                      </dd>
-                    </dl>
-                  </div>
+                  <p className="text-yellow-100 text-sm">Total this month</p>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Earnings */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">💰</span>
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* My Tasks */}
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">📋 My Tasks</h2>
+                <p className="text-sm text-gray-600">Monthly chores and reserved bonus tasks</p>
+              </div>
+              <div className="p-6">
+                {allTasks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No tasks assigned yet!</p>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Monthly Allowance
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        ${currentUser?.monthlyAllowance.toFixed(2)}
-                      </dd>
-                    </dl>
+                ) : (
+                  <div className="space-y-4">
+                    {allTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className={`border rounded-lg p-4 ${
+                          task.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                        } ${task.type === 'bonus' ? 'border-l-4 border-l-blue-400' : ''}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <h3 className="font-medium text-gray-900">{task.title}</h3>
+                              {task.type === 'bonus' && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  +${task.rewardAmount}
+                                </span>
+                              )}
+                            </div>
+                            {task.description && (
+                              <p className="mt-1 text-sm text-gray-600">{task.description}</p>
+                            )}
+                            {task.isCompleted && (
+                              <div className="mt-2 flex items-center space-x-2 text-sm">
+                                <span className="text-green-600">✅ Completed</span>
+                                {task.approvedAt ? (
+                                  <span className="text-green-600">✓ Approved</span>
+                                ) : (
+                                  <span className="text-yellow-600">⏳ Pending approval</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          {!task.isCompleted && (
+                            <button
+                              onClick={() => 
+                                task.type === 'chore' 
+                                  ? handleCompleteChore(task.id)
+                                  : handleCompleteReservation(task.id)
+                              }
+                              className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                              Mark Done
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
+              </div>
+            </div>
+
+            {/* Available Bonus Tasks */}
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">⭐ Available Bonus Tasks</h2>
+                <p className="text-sm text-gray-600">Reserve these tasks to earn extra money</p>
+              </div>
+              <div className="p-6">
+                {availableTasks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No bonus tasks available right now!</p>
+                    <p className="text-sm text-gray-400 mt-2">Check back later for new opportunities</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {availableTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="border border-gray-200 rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <h3 className="font-medium text-gray-900">{task.title}</h3>
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                +${task.rewardAmount}
+                              </span>
+                            </div>
+                            {task.description && (
+                              <p className="mt-1 text-sm text-gray-600">{task.description}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => handleReserveTask(task.id)}
+                            className="ml-4 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                          >
+                            Reserve
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -14,21 +14,20 @@ Goal: ship visible core flows fast using mocked data. Defer auth and DB until la
   - [x] Create in-memory stores for users, chores, bonus tasks
   - [x] Simulate network latency and error cases
   - [x] Enforce role gating for child actions
-- [ ] Child Dashboard (UI only, mock-backed)
-  - [ ] Monthly chores checklist (mark complete)
-  - [ ] Available bonus tasks list (reserve)
-  - [ ] Reserved tasks view (complete)
-  - [ ] Earnings tracker (monthly allowance + approved bonus rewards)
-- [ ] Child flows (mock services)
-  - [ ] List chores by child for current month
-  - [ ] Reserve bonus task — prevent double reservation in-memory
-  - [ ] Mark chore/task completed (child)
-- [ ] Allowance summary (client-calculated)
-  - [ ] Show monthly base allowance + approved bonus totals
-  - [ ] Display combined total in child dashboard footer
-- [ ] Accessibility & mobile-first (scope: child screens)
-  - [ ] Keyboard navigation, labels, focus rings, contrast
-  - [ ] Responsive layout for child dashboard and lists
+- [x] Child Dashboard (UI only, mock-backed)
+  - [x] Monthly chores and bonus tasks checklist (mark complete)
+  - [x] Available bonus tasks list (reserve)
+  - [x] Earnings tracker (monthly allowance + approved bonus rewards)
+- [x] Child flows (mock services)
+  - [x] List chores by child for current month
+  - [x] Reserve bonus task — prevent double reservation in-memory
+  - [x] Mark chore/task completed (child)
+- [x] Allowance summary (client-calculated)
+  - [x] Show monthly base allowance + approved bonus totals
+  - [x] Display combined total in child dashboard footer
+- [x] Accessibility & mobile-first (scope: child screens)
+  - [x] Keyboard navigation, labels, focus rings, contrast
+  - [x] Responsive layout for child dashboard and lists
 - [ ] Testing (scope: child flows)
   - [ ] Unit tests for allowance calculation and reservation logic
   - [ ] Component tests for chores checklist interactions

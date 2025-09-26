@@ -43,8 +43,8 @@ This is a simple to-do app for the whole family, especially for kids who want to
 
 ## 5. User Stories  
 - **As a parent**, I want to create a list of chores for my kids so that I can track household responsibilities.  
-- **As a parent**, I want to add bonus tasks with specific rewards so my kids can take initiative.  
-- **As a child**, I want to see my chores list so I know what I need to do.  
+- **As a parent**, I want to add bonus tasks with specific rewards so my kids can take initiative. 
+- **As a child**, I want to see my chores and bunus tasks list so I know what I need to do. The monthly chores and bonus tasks should be in the same list so that I can easily understand all work expected from me.  
 - **As a child**, I want to reserve a bonus task so no one else takes it.  
 - **As a child**, I want to mark tasks as done so I can earn my allowance.  
 
