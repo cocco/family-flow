@@ -28,11 +28,11 @@ Goal: ship visible core flows fast using mocked data. Defer auth and DB until la
 - [x] Accessibility & mobile-first (scope: child screens)
   - [x] Keyboard navigation, labels, focus rings, contrast
   - [x] Responsive layout for child dashboard and lists
-- [ ] Testing (scope: child flows)
-  - [ ] Unit tests for allowance calculation and reservation logic
-  - [ ] Component tests for chores checklist interactions
-- [ ] Seed data (child scope)
-  - [ ] Seed 1 parent (placeholder) + 2 children, chores, and available bonus tasks
+- [x] Testing (scope: child flows)
+  - [x] Unit tests for allowance calculation and reservation logic
+  - [x] Component tests for chores checklist interactions
+- [x] Seed data (child scope)
+  - [x] Seed 1 parent (placeholder) + 2 children, chores, and available bonus tasks
 
 Exit criteria (Phase 1): A child can use the app with mocked data to view chores, reserve/complete bonus tasks, complete chores, and see monthly earnings.
 

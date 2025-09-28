@@ -61,6 +61,14 @@ export class InMemoryStore {
     return deepClone(res);
   }
 
+  approveReservation(reservationId: string, approvedBy: string): TaskReservationDto | null {
+    const res = this.reservations.find((r) => r.id === reservationId);
+    if (!res) return null;
+    res.approvedBy = approvedBy;
+    res.approvedAt = new Date().toISOString();
+    return deepClone(res);
+  }
+
   completeChore(choreId: string): ChoreDto | null {
     const chore = this.chores.find((c) => c.id === choreId);
     if (!chore) return null;
