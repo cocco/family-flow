@@ -1,15 +1,23 @@
 import React from 'react';
 import { useApp } from '../contexts/AppContext';
+import { usersFixture } from '../api/fixtures';
+import type { UserDto } from '../api/types';
 
 const RoleSwitcher: React.FC = () => {
-  const { currentUser, switchRole } = useApp();
+  const { currentUser, login } = useApp();
 
   if (!currentUser) {
     return null;
   }
 
   const handleRoleSwitch = (role: 'parent' | 'child'): void => {
-    switchRole(role);
+    const targetUser: UserDto | undefined =
+      role === 'parent'
+        ? usersFixture.find((u) => u.role === 'parent')
+        : usersFixture.find((u) => u.role === 'child');
+    if (targetUser) {
+      login(targetUser);
+    }
   };
 
   return (

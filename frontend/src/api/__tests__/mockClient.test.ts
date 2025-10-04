@@ -351,7 +351,7 @@ describe('mockClient', () => {
         month,
         year,
         baseAllowance: 20,
-        approvedBonusTotal: 5,
+        bonusTotal: 5,
         total: 25,
       });
     });
@@ -368,7 +368,7 @@ describe('mockClient', () => {
       if ('data' in result) {
         expect(result.data.childId).toBe(childUser.id);
         expect(result.data.baseAllowance).toBe(20);
-        expect(result.data.approvedBonusTotal).toBe(5);
+        expect(result.data.bonusTotal).toBe(5);
         expect(result.data.total).toBe(25);
         expect(mockStore.calculateChildAllowance).toHaveBeenCalledWith(childUser.id, month, year);
       }

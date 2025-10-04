@@ -126,7 +126,7 @@ const ChildDashboard: React.FC = () => {
       type: 'chore' as const,
       isCompleted: chore.isCompleted,
       completedAt: chore.completedAt,
-      approvedAt: chore.approvedAt,
+      // approvals removed in trust-based flow
       rewardAmount: 0, // Monthly chores don't have individual rewards
     })),
     ...reservations.map(reservation => {
@@ -138,7 +138,7 @@ const ChildDashboard: React.FC = () => {
         type: 'bonus' as const,
         isCompleted: reservation.isCompleted,
         completedAt: reservation.completedAt,
-        approvedAt: reservation.approvedAt,
+        // approvals removed in trust-based flow
         rewardAmount: task?.rewardAmount || 0,
       };
     }),
@@ -200,8 +200,8 @@ const ChildDashboard: React.FC = () => {
                   <h2 className="text-2xl font-bold text-white">💰 Monthly Earnings</h2>
                   <p className="text-yellow-100">
                     Base allowance: ${allowanceSummary.baseAllowance.toFixed(2)}
-                    {allowanceSummary.approvedBonusTotal > 0 && (
-                      <span> + ${allowanceSummary.approvedBonusTotal.toFixed(2)} bonus</span>
+                    {allowanceSummary.bonusTotal > 0 && (
+                      <span> + ${allowanceSummary.bonusTotal.toFixed(2)} bonus</span>
                     )}
                   </p>
                 </div>
@@ -252,11 +252,7 @@ const ChildDashboard: React.FC = () => {
                             {task.isCompleted && (
                               <div className="mt-2 flex items-center space-x-2 text-sm">
                                 <span className="text-green-600">✅ Completed</span>
-                                {task.approvedAt ? (
-                                  <span className="text-green-600">✓ Approved</span>
-                                ) : (
-                                  <span className="text-yellow-600">⏳ Pending approval</span>
-                                )}
+                                {/* No approval state in trust-based flow */}
                               </div>
                             )}
                           </div>

@@ -61,8 +61,7 @@ CREATE TABLE chores (
   description TEXT,
   is_completed BOOLEAN DEFAULT FALSE,
   completed_at TIMESTAMP NULL,
-  approved_by INTEGER NULL,
-  approved_at TIMESTAMP NULL,
+  -- approvals removed in trust-based flow
   month INTEGER NOT NULL,
   year INTEGER NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -93,8 +92,7 @@ CREATE TABLE task_reservations (
   child_id INTEGER NOT NULL,
   is_completed BOOLEAN DEFAULT FALSE,
   completed_at TIMESTAMP NULL,
-  approved_by INTEGER NULL,
-  approved_at TIMESTAMP NULL,
+  -- approvals removed in trust-based flow
   reserved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (task_id) REFERENCES bonus_tasks(id),
   FOREIGN KEY (child_id) REFERENCES users(id),
@@ -120,7 +118,7 @@ CREATE TABLE task_reservations (
 - `POST /api/chores` - Create monthly chores (parent only)
 - `PUT /api/chores/:id` - Update chore
 - `PUT /api/chores/:id/complete` - Mark chore as completed (child)
-- `PUT /api/chores/:id/approve` - Approve completed chore (parent)
+-- approvals removed in trust-based flow
 - `DELETE /api/chores/:id` - Delete chore (parent only)
 
 ### 3.4 Bonus Tasks Management
@@ -129,7 +127,7 @@ CREATE TABLE task_reservations (
 - `PUT /api/tasks/:id` - Update bonus task (parent only)
 - `POST /api/tasks/:id/reserve` - Reserve task (child)
 - `PUT /api/tasks/:id/complete` - Mark task as completed (child)
-- `PUT /api/tasks/:id/approve` - Approve completed task (parent)
+-- approvals removed in trust-based flow
 - `DELETE /api/tasks/:id` - Delete task (parent only)
 
 ### 3.5 Allowance Tracking

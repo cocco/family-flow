@@ -38,27 +38,26 @@ Exit criteria (Phase 1): A child can use the app with mocked data to view chores
 
 ## Phase 2 — Parent Functionality (mocked, with seed data; no auth, no DB)
 - [ ] Parent Dashboard (UI only, mock-backed)
-  - [ ] Family overview: children progress (completed vs total chores)
-  - [ ] Pending approvals list
-  - [ ] Create chore modal (client-side only)
-  - [ ] Create bonus task modal (client-side only)
+  - [x] Family overview: list children with base allowance and totals
+  - [x] Trust-based: no approvals UI or flow
+  - [x] Create chore modal (client-side only)
+  - [x] Create bonus task modal (client-side only)
+  - [x] Family totals card (base, bonus, total)
 - [ ] Parent flows (mock services)
-  - [ ] Approve completed chore
-  - [ ] Approve completed bonus task
-  - [ ] Create/update/delete bonus tasks
-  - [ ] Create/update/delete chores
+  - [x] Create/update/delete bonus tasks
+  - [x] Create/update/delete chores
 - [ ] Allowance roll-ups (client-calculated)
-  - [ ] Per-child monthly summaries
+  - [x] Per-child monthly summaries (base, bonus, total)
   - [ ] Family overview totals
 - [ ] Accessibility & mobile-first (scope: parent screens)
+  - [x] Responsive layout for parent dashboard cards and lists
   - [ ] Keyboard navigation, labels, focus rings, contrast
-  - [ ] Responsive layout for parent dashboard and tables
 - [ ] Testing (scope: parent flows)
   - [ ] Component tests for approvals and creation modals
-- [ ] Seed data (parent scope)
-  - [ ] Preload pending approvals and a mix of completed/pending items
+- [x] Seed data (parent scope)
+  - [x] Preload pending approvals and a mix of completed/pending items
 
-Exit criteria (Phase 2): A parent can manage chores and bonus tasks, approve completions, and see allowance summaries using mocked data.
+Exit criteria (Phase 2): A parent can manage chores and bonus tasks and see allowance summaries using mocked data. No approvals are required (trust-based).
 
 ## Phase 3 — Thin Backend Scaffold (still in-memory)
 - [ ] Create Node.js Express server (TypeScript)

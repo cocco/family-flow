@@ -1,17 +1,14 @@
-import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../test-utils';
 import ChildDashboard from '../pages/ChildDashboard';
-import { InMemoryStore } from '../api/store';
-import { usersFixture, choresFixture, bonusTasksFixture } from '../api/fixtures';
+import { usersFixture } from '../api/fixtures';
 import type { UserDto } from '../api/types';
 import { mockClient } from '../api/mockClient';
 // Import Jest DOM matchers
 import '@testing-library/jest-dom';
 
 // Mock the mockClient to use a real store instance
-const mockStore = new InMemoryStore();
 
 jest.mock('../api/mockClient', () => ({
   mockClient: {
@@ -104,7 +101,7 @@ describe('Child Flows Integration Tests', () => {
       return { data: { childId: childUser.id, month, year, baseAllowance: 20, approvedBonusTotal: 0, total: 20 } };
     });
     
-    (mockClient.completeChore as jest.Mock).mockImplementation(async (ctx: any, choreId: string) => {
+    (mockClient.completeChore as jest.Mock).mockImplementation(async (_ctx: any, choreId: string) => {
       const chore = cleanChores.find(c => c.id === choreId);
       if (chore) {
         chore.isCompleted = true;
@@ -114,14 +111,14 @@ describe('Child Flows Integration Tests', () => {
       return { error: { code: 'NOT_FOUND', message: 'Chore not found' } };
     });
     
-    (mockClient.reserveBonusTask as jest.Mock).mockImplementation(async (ctx: any, taskId: string) => {
+    (mockClient.reserveBonusTask as jest.Mock).mockImplementation(async (_ctx: any, taskId: string) => {
       const task = cleanBonusTasks.find(t => t.id === taskId);
       if (task && task.isAvailable) {
         task.isAvailable = false;
         const reservation = {
-          id: `${taskId}:${ctx.currentUser.id}`,
+          id: `${taskId}:${childUser.id}`,
           taskId,
-          childId: ctx.currentUser.id,
+          childId: childUser.id,
           isCompleted: false,
           reservedAt: new Date().toISOString(),
         };
@@ -131,7 +128,7 @@ describe('Child Flows Integration Tests', () => {
       return { error: { code: 'ALREADY_RESERVED', message: 'Task already reserved' } };
     });
     
-    (mockClient.completeReservation as jest.Mock).mockImplementation(async (ctx: any, reservationId: string) => {
+    (mockClient.completeReservation as jest.Mock).mockImplementation(async (_ctx: any, reservationId: string) => {
       const reservation = cleanReservations.find(r => r.id === reservationId);
       if (reservation) {
         reservation.isCompleted = true;

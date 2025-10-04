@@ -30,8 +30,6 @@ export interface ChoreDto {
   description?: string;
   isCompleted: boolean;
   completedAt?: string; // ISO
-  approvedBy?: string; // user id
-  approvedAt?: string; // ISO
   month: number; // 1-12
   year: number;
 }
@@ -51,8 +49,6 @@ export interface TaskReservationDto {
   childId: string;
   isCompleted: boolean;
   completedAt?: string; // ISO
-  approvedBy?: string;
-  approvedAt?: string;
   reservedAt: string; // ISO
 }
 
@@ -61,8 +57,8 @@ export interface ChildAllowanceSummaryDto {
   month: number;
   year: number;
   baseAllowance: number;
-  approvedBonusTotal: number;
-  total: number; // base + approved bonuses
+  bonusTotal: number;
+  total: number; // base + bonuses
 }
 
 

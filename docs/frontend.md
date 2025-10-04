@@ -10,16 +10,16 @@
 *See [architecture.md §2 Technical Requirements](architecture.md#2-technical-requirements) and [§3 System Architecture](architecture.md#3-system-architecture) for high-level system details.*
 
 ### 1.1 Parent Dashboard
-- Family overview with all children's progress
-- Quick actions to create chores and bonus tasks
-- Pending approvals notification area
-- Monthly allowance summaries with bonus task breakdown
+- Family overview with all children showing base allowance and totals
+- Monthly allowance summaries with bonus breakdown (per child)
+- Trust-based flow: no approvals required
+- Quick actions to create chores and bonus tasks (planned)
 
 ### 1.2 Child Dashboard
 - Personal chores checklist with completed bonus tasks integrated
 - Available bonus tasks browser
 - Reserved tasks status
-- Earnings tracker showing monthly allowance + bonus task rewards
+- Earnings tracker showing monthly allowance + bonus task rewards (no approval gate)
 
 ### 1.3 Responsive Design
 - Mobile-first approach with touch-friendly interfaces

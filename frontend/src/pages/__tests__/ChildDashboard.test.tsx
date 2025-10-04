@@ -36,7 +36,7 @@ describe('ChildDashboard', () => {
     month,
     year,
     baseAllowance: 20,
-    approvedBonusTotal: 0,
+    bonusTotal: 0,
     total: 20,
   };
 
@@ -88,7 +88,7 @@ describe('ChildDashboard', () => {
   it('should display allowance summary with bonus tasks', async () => {
     const allowanceWithBonus: ChildAllowanceSummaryDto = {
       ...mockAllowanceSummary,
-      approvedBonusTotal: 5,
+      bonusTotal: 5,
       total: 25,
     };
     mockMockClient.getAllowanceSummary.mockResolvedValue({ data: allowanceWithBonus });

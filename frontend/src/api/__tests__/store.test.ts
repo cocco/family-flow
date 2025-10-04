@@ -188,7 +188,7 @@ describe('InMemoryStore', () => {
   });
 
   describe('calculateChildAllowance', () => {
-    it('should calculate allowance with base allowance and existing bonuses', () => {
+    it('should calculate allowance with base allowance and existing completed bonuses', () => {
       const childId = usersFixture[1].id; // Sam
       const month = new Date().getMonth() + 1;
       const year = new Date().getFullYear();
@@ -198,17 +198,16 @@ describe('InMemoryStore', () => {
       expect(summary).not.toBeNull();
       expect(summary?.childId).toBe(childId);
       expect(summary?.baseAllowance).toBe(20); // Sam's monthly allowance
-      expect(summary?.approvedBonusTotal).toBe(5); // Sam has approved bonus from seed data
-      expect(summary?.total).toBe(25);
+      expect(summary?.bonusTotal).toBe(7); // Sam has completed bonuses totaling $7 (5 + 2)
+      expect(summary?.total).toBe(27);
     });
 
-    it('should calculate allowance with additional approved bonus tasks', () => {
+    it('should calculate allowance with additional completed bonus tasks (no approvals)', () => {
       const childId = usersFixture[1].id; // Sam
-      const parentId = usersFixture[0].id; // Alex (Parent)
       const month = new Date().getMonth() + 1;
       const year = new Date().getFullYear();
 
-      // Reserve and complete an available task, then approve it
+      // Reserve and complete an available task (trust-based flow)
       const availableTasks = store.getAvailableBonusTasks();
       const taskId = availableTasks[0].id; // First available task
       const reservation = store.reserveTask(taskId, childId);
@@ -217,24 +216,20 @@ describe('InMemoryStore', () => {
       const completedReservation = store.completeReservation(reservation!.id);
       expect(completedReservation).not.toBeNull();
 
-      // Approve the reservation (simulating parent approval)
-      const approvedReservation = store.approveReservation(reservation!.id, parentId);
-      expect(approvedReservation).not.toBeNull();
-
       const summary = store.calculateChildAllowance(childId, month, year);
 
       expect(summary).not.toBeNull();
       expect(summary?.baseAllowance).toBe(20);
-      expect(summary?.approvedBonusTotal).toBe(5 + availableTasks[0].rewardAmount); // Existing + new bonus
-      expect(summary?.total).toBe(20 + 5 + availableTasks[0].rewardAmount);
+      expect(summary?.bonusTotal).toBe(7 + availableTasks[0].rewardAmount); // Existing completed ($7) + new bonus
+      expect(summary?.total).toBe(20 + 7 + availableTasks[0].rewardAmount);
     });
 
-    it('should not count unapproved bonus tasks', () => {
+    it('should count completed bonus tasks without approvals', () => {
       const childId = usersFixture[1].id; // Sam
       const month = new Date().getMonth() + 1;
       const year = new Date().getFullYear();
 
-      // Reserve and complete an available task but don't approve it
+      // Reserve and complete an available task
       const availableTasks = store.getAvailableBonusTasks();
       const taskId = availableTasks[0].id; // First available task
       const reservation = store.reserveTask(taskId, childId);
@@ -242,14 +237,13 @@ describe('InMemoryStore', () => {
 
       const completedReservation = store.completeReservation(reservation!.id);
       expect(completedReservation).not.toBeNull();
-      // Note: not approving the reservation
 
       const summary = store.calculateChildAllowance(childId, month, year);
 
       expect(summary).not.toBeNull();
       expect(summary?.baseAllowance).toBe(20);
-      expect(summary?.approvedBonusTotal).toBe(5); // Only existing approved bonuses from seed data
-      expect(summary?.total).toBe(25);
+      expect(summary?.bonusTotal).toBe(7 + availableTasks[0].rewardAmount);
+      expect(summary?.total).toBe(20 + 7 + availableTasks[0].rewardAmount);
     });
 
     it('should return null for non-existent child', () => {

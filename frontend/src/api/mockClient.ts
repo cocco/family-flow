@@ -114,6 +114,117 @@ export const mockClient = {
     if (!summary) return error('NOT_FOUND', 'Child not found');
     return { data: summary };
   },
+
+  // Parent endpoints (mocked)
+  async listFamily(ctx: RequestContext): Promise<ApiResult<UserDto[]>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can view family');
+    return { data: store.getUsers() };
+  },
+
+  async listMonthlySummaries(
+    ctx: RequestContext,
+    month: number,
+    year: number,
+  ): Promise<ApiResult<{ childId: string; baseAllowance: number; bonusTotal: number; total: number }[]>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can view summaries');
+    return { data: store.getMonthlySummaries(month, year) };
+  },
+
+  // Parent CRUD — Chores
+  async createChore(
+    ctx: RequestContext,
+    input: { childId: string; title: string; description?: string; month: number; year: number },
+  ): Promise<ApiResult<ChoreDto>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can create chores');
+    const created = store.createChore(input);
+    if (!created) return error('BAD_REQUEST', 'Invalid child for chore');
+    return { data: created };
+  },
+
+  async updateChore(
+    ctx: RequestContext,
+    choreId: string,
+    updates: Partial<Pick<ChoreDto, 'title' | 'description' | 'isCompleted'>>,
+  ): Promise<ApiResult<ChoreDto>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can update chores');
+    const updated = store.updateChore(choreId, updates);
+    if (!updated) return error('NOT_FOUND', 'Chore not found');
+    return { data: updated };
+  },
+
+  async deleteChore(
+    ctx: RequestContext,
+    choreId: string,
+  ): Promise<ApiResult<{ id: string }>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can delete chores');
+    const deleted = store.deleteChore(choreId);
+    if (!deleted) return error('NOT_FOUND', 'Chore not found');
+    return { data: { id: choreId } };
+  },
+
+  // Parent CRUD — Bonus Tasks
+  async createBonusTask(
+    ctx: RequestContext,
+    input: { title: string; description?: string; rewardAmount: number },
+  ): Promise<ApiResult<BonusTaskDto>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can create bonus tasks');
+    if (input.rewardAmount <= 0) return error('BAD_REQUEST', 'Reward amount must be positive');
+    const created = store.createBonusTask({ createdBy: ctx.currentUser!.id, ...input });
+    if (!created) return error('BAD_REQUEST', 'Invalid parent for bonus task');
+    return { data: created };
+  },
+
+  async updateBonusTask(
+    ctx: RequestContext,
+    taskId: string,
+    updates: Partial<Pick<BonusTaskDto, 'title' | 'description' | 'rewardAmount' | 'isAvailable'>>,
+  ): Promise<ApiResult<BonusTaskDto>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can update bonus tasks');
+    const updated = store.updateBonusTask(taskId, updates);
+    if (!updated) return error('NOT_FOUND', 'Bonus task not found');
+    return { data: updated };
+  },
+
+  async deleteBonusTask(
+    ctx: RequestContext,
+    taskId: string,
+  ): Promise<ApiResult<{ id: string }>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can delete bonus tasks');
+    const deleted = store.deleteBonusTask(taskId);
+    if (!deleted) return error('NOT_FOUND', 'Bonus task not found');
+    return { data: { id: taskId } };
+  },
+
+  async createChoresForAllChildren(
+    ctx: RequestContext,
+    title: string,
+    description: string | undefined,
+    month: number,
+    year: number,
+  ): Promise<ApiResult<ChoreDto[]>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    if (!requireRole(ctx, 'parent')) return error('FORBIDDEN', 'Only parents can create chores');
+    if (!title || !title.trim()) return error('INVALID_ARGUMENT', 'Title is required');
+    const created = store.addChoresForAllChildren(title.trim(), description?.trim() || undefined, month, year);
+    return { data: created };
+  },
 };
 
 export type MockClient = typeof mockClient;

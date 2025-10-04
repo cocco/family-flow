@@ -61,15 +61,14 @@ These rules guide code generation and edits for the application. Treat `docs/**`
 - Keep diffs focused; avoid unrelated refactors within functional changes.
 - Match the existing formatting and conventions of the codebase.
 
-### 11) Definition of Done (each PR)
+### 11) Definition of Done for each coding task
 - Aligned with `docs/` scope and contracts; no undocumented features.
 - Types strict, no `any` in public APIs; lints and type checks pass.
 - Tests added/updated and passing; code is accessible and responsive where relevant.
 - Proper error handling and logging; no secrets in code or logs.
 - `README.md` and `.env.example` updated if behavior or configuration changed.
 - You have killed all the processes you spawned up during the development
-
-### 12 Documnent changes
 - Verify that the documentation is up-to-date after each change in the code base
-- Always update todo.md
+- Summarize in the chat what you just did
+
 

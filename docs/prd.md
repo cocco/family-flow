@@ -22,7 +22,7 @@ This is a simple to-do app for the whole family, especially for kids who want to
 
 ## 4. Functional Requirements  
 1. **User Roles:**  
-   - Parent: Can create/edit/delete chores and bonus tasks, approve completed tasks, and manage allowances.  
+   - Parent: Can create/edit/delete chores and bonus tasks, and manage allowances.  
    - Child: Can view their chores and bonus tasks, reserve tasks, and mark them as completed.  
 
 2. **Chores Management:**  
@@ -34,7 +34,7 @@ This is a simple to-do app for the whole family, especially for kids who want to
    - Parents can create bonus tasks with descriptions and reward amounts.  
    - Kids can reserve available bonus tasks to avoid duplication.  
    - Kids can mark bonus tasks as completed.  
-   - Parents can approve or reject completion.  
+   - Trust-based flow: no parental approvals required.  
 
 4. **Allowance Tracking:**  
    - The app tracks earned allowance per child based on completed chores and bonus tasks.  
@@ -51,7 +51,7 @@ This is a simple to-do app for the whole family, especially for kids who want to
 ## 6. Acceptance Criteria  
 - Parents can create, edit, and delete chores and bonus tasks.  
 - Children can view, reserve, and complete tasks.  
-- Completed tasks require parent approval before being counted.  
+- Completed tasks do not require parent approval; completion counts immediately.  
 - The app displays a monthly allowance summary for each child.  
 - Payments are tracked but not processed inside the app.  
 
