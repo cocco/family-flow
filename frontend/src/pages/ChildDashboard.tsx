@@ -129,19 +129,22 @@ const ChildDashboard: React.FC = () => {
       // approvals removed in trust-based flow
       rewardAmount: 0, // Monthly chores don't have individual rewards
     })),
-    ...reservations.map(reservation => {
-      const task = taskById[reservation.taskId];
-      return {
-        id: reservation.id,
-        title: task?.title || 'Unknown Task',
-        description: task?.description,
-        type: 'bonus' as const,
-        isCompleted: reservation.isCompleted,
-        completedAt: reservation.completedAt,
-        // approvals removed in trust-based flow
-        rewardAmount: task?.rewardAmount || 0,
-      };
-    }),
+    // Filter out reservations without a matching task to avoid "Unknown Task" entries
+    ...reservations
+      .filter(reservation => Boolean(taskById[reservation.taskId]))
+      .map(reservation => {
+        const task = taskById[reservation.taskId]!;
+        return {
+          id: reservation.id,
+          title: task.title,
+          description: task.description,
+          type: 'bonus' as const,
+          isCompleted: reservation.isCompleted,
+          completedAt: reservation.completedAt,
+          // approvals removed in trust-based flow
+          rewardAmount: task.rewardAmount,
+        };
+      }),
   ];
 
   if (loading) {
@@ -219,7 +222,7 @@ const ChildDashboard: React.FC = () => {
             {/* My Tasks */}
             <div className="bg-white shadow rounded-lg">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">📋 My Tasks</h2>
+                <h2 className="text-xl font-semibold text-gray-900">📋 My Monthly Tasks</h2>
                 <p className="text-sm text-gray-600">Monthly chores and reserved bonus tasks</p>
               </div>
               <div className="p-6">
