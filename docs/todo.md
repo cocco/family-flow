@@ -37,23 +37,23 @@ Goal: ship visible core flows fast using mocked data. Defer auth and DB until la
 Exit criteria (Phase 1): A child can use the app with mocked data to view chores, reserve/complete bonus tasks, complete chores, and see monthly earnings.
 
 ## Phase 2 — Parent Functionality (mocked, with seed data; no auth, no DB)
-- [ ] Parent Dashboard (UI only, mock-backed)
+- [x] Parent Dashboard (UI only, mock-backed)
   - [x] Family overview: list children with base allowance and totals
   - [x] Trust-based: no approvals UI or flow
   - [x] Create chore modal (client-side only)
   - [x] Create bonus task modal (client-side only)
   - [x] Family totals card (base, bonus, total)
-- [ ] Parent flows (mock services)
+- [x] Parent flows (mock services)
   - [x] Create/update/delete bonus tasks
   - [x] Create/update/delete chores
-- [ ] Allowance roll-ups (client-calculated)
+- [x] Allowance roll-ups (client-calculated)
   - [x] Per-child monthly summaries (base, bonus, total)
-  - [ ] Family overview totals
-- [ ] Accessibility & mobile-first (scope: parent screens)
+  - [x] Family overview totals
+- [x] Accessibility & mobile-first (scope: parent screens)
   - [x] Responsive layout for parent dashboard cards and lists
-  - [ ] Keyboard navigation, labels, focus rings, contrast
-- [ ] Testing (scope: parent flows)
-  - [ ] Component tests for approvals and creation modals
+  - [x] Keyboard navigation, labels, focus rings, contrast
+- [x] Testing (scope: parent flows)
+  - [x] Component tests for creation modals and summaries
 - [x] Seed data (parent scope)
   - [x] Preload pending approvals and a mix of completed/pending items
 

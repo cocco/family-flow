@@ -104,6 +104,11 @@ export class InMemoryStore {
     if (!child) return null;
     const bonusTotal = this.reservations.reduce((sum, r) => {
       if (r.childId !== childId || !r.isCompleted) return sum;
+      if (!r.completedAt) return sum;
+      const completedDate = new Date(r.completedAt);
+      const completedMonth = completedDate.getMonth() + 1;
+      const completedYear = completedDate.getFullYear();
+      if (completedMonth !== month || completedYear !== year) return sum;
       const task = this.bonusTasks.find((t) => t.id === r.taskId);
       return sum + (task?.rewardAmount ?? 0);
     }, 0);
