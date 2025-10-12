@@ -188,7 +188,7 @@ describe('InMemoryStore', () => {
   });
 
   describe('calculateChildAllowance', () => {
-    it('should calculate allowance with base allowance and existing completed bonuses', () => {
+    it('should calculate allowance with bonus total only until all chores are completed', () => {
       const childId = usersFixture[1].id; // Sam
       const month = new Date().getMonth() + 1;
       const year = new Date().getFullYear();
@@ -197,9 +197,9 @@ describe('InMemoryStore', () => {
 
       expect(summary).not.toBeNull();
       expect(summary?.childId).toBe(childId);
-      expect(summary?.baseAllowance).toBe(20); // Sam's monthly allowance
+      expect(summary?.baseAllowance).toBe(0); // Not all chores are completed
       expect(summary?.bonusTotal).toBe(7); // Sam has completed bonuses totaling $7 (5 + 2)
-      expect(summary?.total).toBe(27);
+      expect(summary?.total).toBe(7);
     });
 
     it('should calculate allowance with additional completed bonus tasks (no approvals)', () => {
@@ -219,9 +219,9 @@ describe('InMemoryStore', () => {
       const summary = store.calculateChildAllowance(childId, month, year);
 
       expect(summary).not.toBeNull();
-      expect(summary?.baseAllowance).toBe(20);
+      expect(summary?.baseAllowance).toBe(0);
       expect(summary?.bonusTotal).toBe(7 + availableTasks[0].rewardAmount); // Existing completed ($7) + new bonus
-      expect(summary?.total).toBe(20 + 7 + availableTasks[0].rewardAmount);
+      expect(summary?.total).toBe(0 + 7 + availableTasks[0].rewardAmount);
     });
 
     it('should count completed bonus tasks without approvals', () => {
@@ -241,9 +241,29 @@ describe('InMemoryStore', () => {
       const summary = store.calculateChildAllowance(childId, month, year);
 
       expect(summary).not.toBeNull();
-      expect(summary?.baseAllowance).toBe(20);
+      expect(summary?.baseAllowance).toBe(0);
       expect(summary?.bonusTotal).toBe(7 + availableTasks[0].rewardAmount);
-      expect(summary?.total).toBe(20 + 7 + availableTasks[0].rewardAmount);
+      expect(summary?.total).toBe(0 + 7 + availableTasks[0].rewardAmount);
+    });
+
+    it('should include base allowance when all monthly chores are completed', () => {
+      const childId = usersFixture[1].id; // Sam
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+
+      // Complete all of Sam's chores for the month
+      const chores = store.getChildChores(childId, month, year);
+      chores.forEach((c) => {
+        if (!c.isCompleted) {
+          store.completeChore(c.id);
+        }
+      });
+
+      const summary = store.calculateChildAllowance(childId, month, year);
+      expect(summary).not.toBeNull();
+      expect(summary?.baseAllowance).toBe(usersFixture[1].monthlyAllowance); // 20
+      expect(summary?.bonusTotal).toBe(7);
+      expect(summary?.total).toBe(usersFixture[1].monthlyAllowance + 7);
     });
 
     it('should return null for non-existent child', () => {

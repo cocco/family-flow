@@ -42,8 +42,18 @@ const ChildDashboard: React.FC = () => {
 
         setChores(choresResult.data);
         setAvailableTasks(tasksResult.data);
-        // Build a lookup for tasks by id so reserved tasks keep their titles after removal from availability
-        setTaskById(Object.fromEntries(tasksResult.data.map((t) => [t.id, t])));
+        // Build a lookup for tasks by id
+        const lookup: Record<string, BonusTaskDto> = Object.fromEntries(tasksResult.data.map((t) => [t.id, t]));
+        // Backfill task details for existing reservations that reference tasks no longer available
+        for (const res of reservationsResult.data) {
+          if (!lookup[res.taskId]) {
+            const taskResp = await mockClient.getBonusTaskById(ctx, res.taskId);
+            if ('data' in taskResp) {
+              lookup[res.taskId] = taskResp.data;
+            }
+          }
+        }
+        setTaskById(lookup);
         setReservations(reservationsResult.data);
         setAllowanceSummary(allowanceResult.data);
       } catch (err) {
@@ -70,6 +80,11 @@ const ChildDashboard: React.FC = () => {
       setChores(prev => prev.map(chore => 
         chore.id === choreId ? result.data : chore
       ));
+      // Refresh allowance summary after state-changing action
+      try {
+        const res = await mockClient.getAllowanceSummary({ currentUser }, currentUser.id, currentMonth, currentYear);
+        if ('data' in res) setAllowanceSummary(res.data);
+      } catch {}
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete chore');
     }
@@ -112,6 +127,11 @@ const ChildDashboard: React.FC = () => {
       setReservations(prev => prev.map(res => 
         res.id === reservationId ? result.data : res
       ));
+      // Refresh allowance summary after state-changing action
+      try {
+        const res = await mockClient.getAllowanceSummary({ currentUser }, currentUser.id, currentMonth, currentYear);
+        if ('data' in res) setAllowanceSummary(res.data);
+      } catch {}
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete task');
     }

@@ -42,9 +42,9 @@ export class InMemoryStore {
       const summary = this.calculateChildAllowance(child.id, month, year);
       return {
         childId: child.id,
-        baseAllowance: summary?.baseAllowance ?? child.monthlyAllowance,
+        baseAllowance: summary?.baseAllowance ?? 0,
         bonusTotal: summary?.bonusTotal ?? 0,
-        total: summary?.total ?? child.monthlyAllowance,
+        total: summary?.total ?? 0,
       };
     });
   }
@@ -61,6 +61,11 @@ export class InMemoryStore {
 
   getReservationsByChild(childId: string): TaskReservationDto[] {
     return this.reservations.filter((r) => r.childId === childId).map(deepClone);
+  }
+
+  getBonusTaskById(taskId: string): BonusTaskDto | null {
+    const task = this.bonusTasks.find((t) => t.id === taskId);
+    return task ? deepClone(task) : null;
   }
 
   reserveTask(taskId: string, childId: string): TaskReservationDto | null {
@@ -102,6 +107,7 @@ export class InMemoryStore {
   calculateChildAllowance(childId: string, month: number, year: number): ChildAllowanceSummaryDto | null {
     const child = this.users.find((u) => u.id === childId && u.role === 'child');
     if (!child) return null;
+    // Sum completed bonus tasks for the given month/year
     const bonusTotal = this.reservations.reduce((sum, r) => {
       if (r.childId !== childId || !r.isCompleted) return sum;
       if (!r.completedAt) return sum;
@@ -112,7 +118,10 @@ export class InMemoryStore {
       const task = this.bonusTasks.find((t) => t.id === r.taskId);
       return sum + (task?.rewardAmount ?? 0);
     }, 0);
-    const baseAllowance = child.monthlyAllowance;
+    // Base allowance is earned only when ALL monthly chores are completed
+    const childChores = this.getChildChores(childId, month, year);
+    const allChoresCompleted = childChores.length > 0 && childChores.every((c) => c.isCompleted);
+    const baseAllowance = allChoresCompleted ? child.monthlyAllowance : 0;
     return {
       childId,
       month,

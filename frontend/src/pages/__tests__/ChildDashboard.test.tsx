@@ -1,5 +1,4 @@
-import React from 'react';
-import { screen, waitFor, fireEvent, within, act } from '@testing-library/react';
+import { screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { render } from '../../test-utils';
@@ -15,6 +14,7 @@ jest.mock('../../api/mockClient', () => ({
     listAvailableBonusTasks: jest.fn(),
     listReservationsByChild: jest.fn(),
     getAllowanceSummary: jest.fn(),
+    getBonusTaskById: jest.fn(),
     completeChore: jest.fn(),
     reserveBonusTask: jest.fn(),
     completeReservation: jest.fn(),
@@ -48,6 +48,10 @@ describe('ChildDashboard', () => {
     mockMockClient.listAvailableBonusTasks.mockResolvedValue({ data: mockAvailableTasks });
     mockMockClient.listReservationsByChild.mockResolvedValue({ data: mockReservations });
     mockMockClient.getAllowanceSummary.mockResolvedValue({ data: mockAllowanceSummary });
+    mockMockClient.getBonusTaskById.mockImplementation(async (_ctx, taskId: string) => {
+      const task = bonusTasksFixture.find(t => t.id === taskId);
+      return task ? { data: task } as any : { error: { code: 'NOT_FOUND', message: 'Bonus task not found' } } as any;
+    });
   });
 
   it('should render loading state initially', () => {
@@ -67,7 +71,7 @@ describe('ChildDashboard', () => {
     });
 
     expect(screen.getByText('Your tasks and earnings')).toBeInTheDocument();
-    expect(screen.getByText('📋 My Tasks')).toBeInTheDocument();
+    expect(screen.getByText('📋 My Monthly Tasks')).toBeInTheDocument();
     expect(screen.getByText('⭐ Available Bonus Tasks')).toBeInTheDocument();
   });
 
@@ -98,7 +102,7 @@ describe('ChildDashboard', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText((content, element) => {
+      expect(screen.getByText((_, element) => {
         return element?.textContent === 'Base allowance: $20.00 + $5.00 bonus';
       })).toBeInTheDocument();
     });
@@ -235,6 +239,10 @@ describe('ChildDashboard', () => {
     };
 
     mockMockClient.listReservationsByChild.mockResolvedValue({ data: [reservation] });
+    // Reserved tasks should no longer be listed as available
+    mockMockClient.listAvailableBonusTasks.mockResolvedValue({
+      data: bonusTasksFixture.filter(t => t.id !== reservation.taskId),
+    });
     mockMockClient.completeReservation.mockResolvedValue({ data: completedReservation });
 
     await act(async () => {
@@ -242,8 +250,8 @@ describe('ChildDashboard', () => {
     });
 
     await waitFor(() => {
-      // The task should be visible somewhere on the page
-      expect(screen.getAllByText('Wash the car')).toHaveLength(2); // Available in both sections
+      // The task should be visible once (in My Tasks), not in Available list
+      expect(screen.getAllByText('Wash the car')).toHaveLength(1);
     });
 
     // Find the specific "Mark Done" button for the "Wash the car" task
@@ -352,21 +360,25 @@ describe('ChildDashboard', () => {
     };
 
     mockMockClient.listReservationsByChild.mockResolvedValue({ data: [reservation] });
+    // Reserved task removed from available list
+    mockMockClient.listAvailableBonusTasks.mockResolvedValue({
+      data: bonusTasksFixture.filter(t => t.id !== reservation.taskId),
+    });
 
     await act(async () => {
       render(<ChildDashboard />, { currentUser: childUser });
     });
 
     await waitFor(() => {
-      // The task should be visible somewhere on the page
-      expect(screen.getAllByText('Wash the car')).toHaveLength(2); // Available in both sections
+      // The task should be visible only in My Tasks
+      expect(screen.getAllByText('Wash the car')).toHaveLength(1);
     });
 
     // Should have blue left border indicating it's a bonus task
     const washCarElements = screen.getAllByText('Wash the car');
     const taskElement = washCarElements[0].closest('[class*="border rounded-lg"]');
     expect(taskElement).toHaveClass('border-l-4', 'border-l-blue-400');
-    expect(screen.getAllByText('+$5')).toHaveLength(2); // Wash the car appears in both sections
+    expect(screen.getAllByText('+$5')).toHaveLength(1); // Appears only in My Tasks
   });
 
   it('should not show Mark Done button for completed tasks', async () => {

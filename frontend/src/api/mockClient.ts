@@ -66,6 +66,17 @@ export const mockClient = {
     return { data: store.getReservationsByChild(childId) };
   },
 
+  async getBonusTaskById(
+    ctx: RequestContext,
+    taskId: string,
+  ): Promise<ApiResult<BonusTaskDto>> {
+    await delay();
+    if (!requireAuth(ctx)) return error('UNAUTHENTICATED', 'You must be logged in');
+    const task = store.getBonusTaskById(taskId);
+    if (!task) return error('NOT_FOUND', 'Bonus task not found');
+    return { data: task };
+  },
+
   async reserveBonusTask(
     ctx: RequestContext,
     taskId: string,
