@@ -151,17 +151,12 @@ const ParentDashboard: React.FC = () => {
               </div>
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {/* Family Overview */}
-            <section className="bg-white overflow-hidden shadow rounded-lg" role="region" aria-labelledby="family-overview-title">
+            <section className="bg-white overflow-hidden shadow rounded-lg border border-gray-200" role="region" aria-labelledby="family-overview-title">
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center" aria-hidden="true">
-                      <span className="text-white text-sm font-medium">👨‍👩‍👧‍👦</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="w-0 flex-1">
                     <div>
                       <div id="family-overview-title" className="text-sm font-medium text-gray-800">Family Overview</div>
                       <div className="mt-1 text-lg font-semibold text-gray-900">
@@ -191,15 +186,10 @@ const ParentDashboard: React.FC = () => {
             </section>
 
             {/* Family Totals */}
-            <section className="bg-white overflow-hidden shadow rounded-lg" role="region" aria-labelledby="family-totals-title">
+            <section className="bg-white overflow-hidden shadow rounded-lg border border-gray-200" role="region" aria-labelledby="family-totals-title">
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-purple-600 rounded-md flex items-center justify-center" aria-hidden="true">
-                      <span className="text-white text-sm font-medium">Σ</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="w-0 flex-1">
                     <div>
                       <div id="family-totals-title" className="text-sm font-medium text-gray-800">Family Totals (This Month)</div>
                       <div className="mt-3 grid grid-cols-3 gap-4 text-center">
@@ -228,43 +218,7 @@ const ParentDashboard: React.FC = () => {
               </div>
             </section>
 
-            {/* Create Tasks */}
-            <section className="bg-white overflow-hidden shadow rounded-lg" role="region" aria-labelledby="create-tasks-title">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center" aria-hidden="true">
-                      <span className="text-white text-sm font-medium">➕</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <div>
-                      <div id="create-tasks-title" className="text-sm font-medium text-gray-800">Create Tasks</div>
-                      <div className="mt-3 flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setIsChoreModalOpen(true)}
-                          aria-haspopup="dialog"
-                          aria-controls="create-chore-dialog"
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
-                        >
-                          New Chore
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsBonusModalOpen(true)}
-                          aria-haspopup="dialog"
-                          aria-controls="create-bonus-dialog"
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-                        >
-                          New Bonus Task
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
+            
           </div>
 
           {/* Monthly Summaries */}
@@ -273,7 +227,7 @@ const ParentDashboard: React.FC = () => {
               <h2 id="monthly-summaries-title" className="text-xl font-semibold text-gray-900">💰 Monthly Allowance Summaries</h2>
               <p className="text-sm text-gray-700">For {now.toLocaleString(undefined, { month: 'long' })} {currentYear}</p>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
               {children.map((child) => {
                 const s = summaries.find((x) => x.childId === child.id);
                 return (
