@@ -2,6 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { mockClient } from '../api/mockClient';
 import type { UserDto } from '../api/types';
+import HeaderActions from '../components/organisms/HeaderActions';
+import FamilyOverviewCard from '../components/organisms/FamilyOverviewCard';
+import FamilyTotalsCard from '../components/organisms/FamilyTotalsCard';
+import CreateChoreModal from '../components/organisms/CreateChoreModal';
+import CreateBonusModal from '../components/organisms/CreateBonusModal';
+import Card from '../components/molecules/Card';
 
 const ParentDashboard: React.FC = () => {
   const { currentUser, logout } = useApp();
@@ -21,8 +27,7 @@ const ParentDashboard: React.FC = () => {
   const bonusTriggerRef = useRef<HTMLButtonElement | null>(null);
   const choreDialogRef = useRef<HTMLDivElement | null>(null);
   const bonusDialogRef = useRef<HTMLDivElement | null>(null);
-  const [newChore, setNewChore] = useState({ title: '', description: '' });
-  const [newBonus, setNewBonus] = useState({ title: '', description: '', rewardAmount: 0 });
+  // moved to modal organisms
 
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -103,35 +108,11 @@ const ParentDashboard: React.FC = () => {
               </h1>
               <p className="text-gray-800">Parent Dashboard</p>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                ref={choreTriggerRef}
-                onClick={() => setIsChoreModalOpen(true)}
-                aria-haspopup="dialog"
-                aria-controls="create-chore-dialog"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
-              >
-                Create Chore
-              </button>
-              <button
-                type="button"
-                ref={bonusTriggerRef}
-                onClick={() => setIsBonusModalOpen(true)}
-                aria-haspopup="dialog"
-                aria-controls="create-bonus-dialog"
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-              >
-                Create Bonus Task
-              </button>
-              <button
-                type="button"
-                onClick={logout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
-              >
-                Logout
-              </button>
-            </div>
+            <HeaderActions
+              onOpenChore={() => setIsChoreModalOpen(true)}
+              onOpenBonus={() => setIsBonusModalOpen(true)}
+              onLogout={logout}
+            />
           </div>
         </div>
       </header>
@@ -152,77 +133,12 @@ const ParentDashboard: React.FC = () => {
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {/* Family Overview */}
-            <section className="bg-white overflow-hidden shadow rounded-lg border border-gray-200" role="region" aria-labelledby="family-overview-title">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="w-0 flex-1">
-                    <div>
-                      <div id="family-overview-title" className="text-sm font-medium text-gray-800">Family Overview</div>
-                      <div className="mt-1 text-lg font-semibold text-gray-900">
-                        {children.length} {children.length === 1 ? 'child' : 'children'}
-                      </div>
-                      <ul className="mt-4 space-y-2">
-                        {children.map((child) => {
-                          const summary = summaries.find((s) => s.childId === child.id);
-                          return (
-                            <li key={child.id} className="flex items-center justify-between border rounded-md px-3 py-2">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">{child.displayName}</div>
-                                <div className="text-xs text-gray-700">Base ${child.monthlyAllowance.toFixed(2)}</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-sm text-gray-800">Bonus {(summary?.bonusTotal ?? 0).toFixed(2)}</div>
-                                <div className="text-base font-semibold text-gray-900">Total {(summary?.total ?? child.monthlyAllowance).toFixed(2)}</div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Family Totals */}
-            <section className="bg-white overflow-hidden shadow rounded-lg border border-gray-200" role="region" aria-labelledby="family-totals-title">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="w-0 flex-1">
-                    <div>
-                      <div id="family-totals-title" className="text-sm font-medium text-gray-800">Family Totals (This Month)</div>
-                      <div className="mt-3 grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-xs text-gray-700">Base</div>
-                          <div className="text-lg font-semibold text-gray-900">
-                            ${summaries.reduce((sum, s) => sum + s.baseAllowance, 0).toFixed(2)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-700">Bonus</div>
-                          <div className="text-lg font-semibold text-gray-900">
-                            ${summaries.reduce((sum, s) => sum + s.bonusTotal, 0).toFixed(2)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-700">Total</div>
-                          <div className="text-lg font-semibold text-gray-900">
-                            ${summaries.reduce((sum, s) => sum + s.total, 0).toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            
+            <FamilyOverviewCard childrenList={children} summaries={summaries} />
+            <FamilyTotalsCard summaries={summaries} />
           </div>
 
           {/* Monthly Summaries */}
-          <section className="mt-8 bg-white shadow rounded-lg" role="region" aria-labelledby="monthly-summaries-title">
+          <Card className="mt-8" role="region" aria-labelledby="monthly-summaries-title">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 id="monthly-summaries-title" className="text-xl font-semibold text-gray-900">💰 Monthly Allowance Summaries</h2>
               <p className="text-sm text-gray-700">For {now.toLocaleString(undefined, { month: 'long' })} {currentYear}</p>
@@ -231,7 +147,7 @@ const ParentDashboard: React.FC = () => {
               {children.map((child) => {
                 const s = summaries.find((x) => x.childId === child.id);
                 return (
-                  <div key={child.id} className="border border-gray-200 rounded-lg p-4">
+                  <Card key={child.id} className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-medium text-gray-900">{child.displayName}</div>
@@ -242,166 +158,29 @@ const ParentDashboard: React.FC = () => {
                         <div className="text-lg font-semibold text-gray-900">Total {(s?.total ?? child.monthlyAllowance).toFixed(2)}</div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 );
               })}
             </div>
-          </section>
+          </Card>
 
-          {/* Chore Modal */}
-          {isChoreModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" aria-labelledby="create-chore-title" role="dialog" aria-modal="true">
-              <div
-                id="create-chore-dialog"
-                ref={choreDialogRef}
-                tabIndex={-1}
-                className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setIsChoreModalOpen(false);
-                    choreTriggerRef.current?.focus();
-                  }
-                }}
-              >
-                <h3 id="create-chore-title" className="text-lg font-semibold text-gray-900">Create Chore</h3>
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label htmlFor="chore-title" className="block text-sm text-gray-800">Title</label>
-                    <input
-                      id="chore-title"
-                      className="mt-1 w-full border rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
-                      value={newChore.title}
-                      onChange={(e) => setNewChore({ ...newChore, title: e.target.value })}
-                      placeholder="e.g., Take out trash"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="chore-description" className="block text-sm text-gray-800">Description (optional)</label>
-                    <textarea
-                      id="chore-description"
-                      className="mt-1 w-full border rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
-                      value={newChore.description}
-                      onChange={(e) => setNewChore({ ...newChore, description: e.target.value })}
-                      placeholder="Add details"
-                    />
-                  </div>
-                </div>
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsChoreModalOpen(false);
-                      choreTriggerRef.current?.focus();
-                    }}
-                    className="px-4 py-2 text-sm rounded-md border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const ctx = { currentUser };
-                      const res = await mockClient.createChoresForAllChildren(ctx, newChore.title, newChore.description, currentMonth, currentYear);
-                      if ('error' in res) {
-                        setError(res.error.message);
-                      } else {
-                        setError(null);
-                      }
-                      setIsChoreModalOpen(false);
-                      setNewChore({ title: '', description: '' });
-                      choreTriggerRef.current?.focus();
-                    }}
-                    aria-disabled={!newChore.title}
-                    className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
-                    disabled={!newChore.title}
-                  >
-                    Create
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <CreateChoreModal
+            isOpen={isChoreModalOpen}
+            onClose={() => setIsChoreModalOpen(false)}
+            triggerRef={choreTriggerRef}
+            dialogRef={choreDialogRef}
+            currentUser={currentUser ?? null}
+            currentMonth={currentMonth}
+            currentYear={currentYear}
+            onError={(msg) => setError(msg)}
+          />
 
-          {/* Bonus Task Modal */}
-          {isBonusModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" aria-labelledby="create-bonus-title" role="dialog" aria-modal="true">
-              <div
-                id="create-bonus-dialog"
-                ref={bonusDialogRef}
-                tabIndex={-1}
-                className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setIsBonusModalOpen(false);
-                    bonusTriggerRef.current?.focus();
-                  }
-                }}
-              >
-                <h3 id="create-bonus-title" className="text-lg font-semibold text-gray-900">Create Bonus Task</h3>
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label htmlFor="bonus-title" className="block text-sm text-gray-800">Title</label>
-                    <input
-                      id="bonus-title"
-                      className="mt-1 w-full border rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-                      value={newBonus.title}
-                      onChange={(e) => setNewBonus({ ...newBonus, title: e.target.value })}
-                      placeholder="e.g., Wash the car"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="bonus-description" className="block text-sm text-gray-800">Description (optional)</label>
-                    <textarea
-                      id="bonus-description"
-                      className="mt-1 w-full border rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-                      value={newBonus.description}
-                      onChange={(e) => setNewBonus({ ...newBonus, description: e.target.value })}
-                      placeholder="Add details"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="bonus-reward" className="block text-sm text-gray-800">Reward Amount ($)</label>
-                    <input
-                      id="bonus-reward"
-                      type="number"
-                      min={0}
-                      step={0.5}
-                      className="mt-1 w-full border rounded-md px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-                      value={newBonus.rewardAmount}
-                      onChange={(e) => setNewBonus({ ...newBonus, rewardAmount: Number(e.target.value) })}
-                      placeholder="e.g., 5"
-                    />
-                  </div>
-                </div>
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsBonusModalOpen(false);
-                      bonusTriggerRef.current?.focus();
-                    }}
-                    className="px-4 py-2 text-sm rounded-md border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // UI-only: no persistence in Phase 2
-                      setIsBonusModalOpen(false);
-                      setNewBonus({ title: '', description: '', rewardAmount: 0 });
-                      bonusTriggerRef.current?.focus();
-                    }}
-                    aria-disabled={!newBonus.title || newBonus.rewardAmount <= 0}
-                    className="px-4 py-2 text-sm rounded-md bg-green-600 text-white disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-                    disabled={!newBonus.title || newBonus.rewardAmount <= 0}
-                  >
-                    Create
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <CreateBonusModal
+            isOpen={isBonusModalOpen}
+            onClose={() => setIsBonusModalOpen(false)}
+            triggerRef={bonusTriggerRef}
+            dialogRef={bonusDialogRef}
+          />
         </div>
       </main>
     </div>

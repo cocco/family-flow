@@ -4,7 +4,7 @@ import { useApp } from '../contexts/AppContext';
 import ChildDashboard from '../pages/ChildDashboard';
 import ParentDashboard from '../pages/ParentDashboard';
 import LoginPage from '../pages/LoginPage';
-import RoleSwitcher from '../components/RoleSwitcher';
+import RoleSwitcher from '../components/organisms/RoleSwitcher';
 
 const AppRouter: React.FC = () => {
   const { isAuthenticated, currentUser } = useApp();

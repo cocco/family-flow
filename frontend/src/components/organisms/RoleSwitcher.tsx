@@ -1,7 +1,7 @@
 import React from 'react';
-import { useApp } from '../contexts/AppContext';
-import { usersFixture } from '../api/fixtures';
-import type { UserDto } from '../api/types';
+import { useApp } from '../../contexts/AppContext';
+import { usersFixture } from '../../api/fixtures';
+import type { UserDto } from '../../api/types';
 
 const RoleSwitcher: React.FC = () => {
   const { currentUser, login } = useApp();
@@ -54,3 +54,5 @@ const RoleSwitcher: React.FC = () => {
 };
 
 export default RoleSwitcher;
+
+
